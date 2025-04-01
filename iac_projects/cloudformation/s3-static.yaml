@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "S3 static file hosting"
+
+Resources:
+  MyS3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "my-static-website-assou"
+      WebsiteConfiguration:
+        IndexDocument: "index.html" # main page deployed
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: false
+
+  BucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      Bucket: !Ref MyS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "PublicReadGetObject" # unique Id for policy statement
+            Effect: "Allow" # policy allows access
+            Principal: "*" # to anyone from public access
+            Action: "s3:GetObject" # action allowed by statement, reading objects from bucket allowed
+            Resource: !Sub "arn:aws:s3:::${MyS3Bucket}/*" # policy aplies to all objects within MyS3Bucket

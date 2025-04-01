@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "IAM CloudFormation template"
+
+Resources:
+  MyIAMUser:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "AsmaCFN"
+      ManagedPolicyArns:
+        - "arn::aws::iam::aws::policy/AdministratorAccess"
+
+  # My IAM Group
+  MyIAMGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "AsmaGroup"
+
+  # Attach User to Group
+  UserToGroup:
+    Type: "AWS::IAM::UserToGroupAddition"
+    Properties:
+      GroupName: !Ref MyIAMGroup
+      Users:
+        - !Ref MyIAMUser
+
+  # IAM Role for EC2
+  MyIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow" # allow action
+            Principal: # ec2 is allowed to perform action
+              Service: ["ec2.amazonaws.com"]
+            Action: ["sts:AssumeRole"]
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/PowerUserAccess"
+
+  # S3 Custom Policy
+  MyIAMPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "CustomPolicy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: # allows us to get object
+              - "s3:GetObject"
+            Resource: "*" # from any S3 resources
+      Roles:
+        - !Ref MyIAMRole
