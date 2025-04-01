@@ -1,0 +1,322 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "CloudFormation for VPC"
+
+Resources:
+  # My VPC
+  MyVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "172.16.0.0/16"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MyVPC
+
+  # Public Subnet in AZ 1
+  PublicSubnet1A:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: "172.16.1.0/24"
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: PublicSubnet1A
+
+  # Data Private Subnet in AZ 1
+  DataPrivateSubnet1A:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: "172.16.3.0/24"
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: DataPrivateSubnet1A
+
+  # WebServerInstance1A:
+  WebServerInstance1A:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: "t2.micro"
+      ImageId: "ami-0d9c7bbbda4b78ffd"
+      SubnetId: !Ref PublicSubnet1A
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: "Name"
+          Value: "WebServerInstance1A"
+      UserData:
+        # uses user data to install Apache webserver
+        # with yum package manager
+        # starts service and enrures it's set to boot
+        # creating html page that has a message
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "Hello form My Web Server 1A" > /var/www/html/index.html
+
+  # WebServerInstance2B:
+  DataPrivateInstance1A:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      InstanceType: "t2.micro"
+      ImageId: "ami-0d9c7bbbda4b78ffd"
+      SubnetId: !Ref DataPrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: "Name"
+          Value: "DataPrivateInstance1A"
+      UserData:
+        # uses user data to install Apache webserver
+        # with yum package manager
+        # starts service and enrures it's set to boot
+        # creating html page that has a message
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "Hello form My Web Server 1A" > /var/www/html/index.html
+
+  MyDB:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: "MyNewRDS" # db name
+      MasterUsername: "admin" # to authenticate into db
+      MasterUserPassword: "whatEver07!"
+      DBInstanceClass: "db.t3.micro" # db instance type
+      DBSubnetGroupName: !Ref DataPrivateSubnet1A
+      Engine: "mysql" # type of database
+      EngineVersion: "8.0.35" # version of sql engine
+      AllocatedStorage: "20"
+      BackupRetentionPeriod: 7 # days
+
+  S3BucketAppFiles:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "assou-s3-bucket-appfiles"
+
+  S3BucketUserData:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "assou-s3-bucket-userdata"
+
+  CloudWatch:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      AlarmName: "monitoring-alarm"
+
+  Developer1:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Developer1"
+
+  Developer2:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Developer2"
+
+  Developer3:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Developer3"
+
+  Developer4:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Developer4"
+
+  Operation1:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Operation1"
+
+  Operation2:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "Operation2"
+
+  FinanceManager:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "FinanceManager"
+
+  DataAnalyst1:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "DataAnalyst1"
+
+  DataAnalyst2:
+    Type: "AWS::IAM::User"
+    Properties:
+      UserName: "DataAnalyst2"
+
+  DeveloperGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "DeveloperGroup"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+
+  OperationGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "OperationGroup"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
+
+  FinanceGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "FinanceGroup"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSBudgetsReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/ReadOnlyAccess"
+
+  AnalystGroup:
+    Type: "AWS::IAM::Group"
+    Properties:
+      GroupName: "AnalystGroup"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess"
+
+  # Attach User to Group
+  DeveloperToGroup:
+    Type: "AWS::IAM::UserToGroupAddition"
+    Properties:
+      GroupName: !Ref DeveloperGroup
+      Users:
+        - !Ref Developer1
+        - !Ref Developer2
+        - !Ref Developer3
+        - !Ref Developer4
+
+  OperationToGroup:
+    Type: "AWS::IAM::UserToGroupAddition"
+    Properties:
+      GroupName: !Ref OperationGroup
+      Users:
+        - !Ref Operation1
+        - !Ref Operation2
+
+  FinanceToGroup:
+    Type: "AWS::IAM::UserToGroupAddition"
+    Properties:
+      GroupName: !Ref FinanceGroup
+      Users:
+        - !Ref FinanceManager
+
+  AnalystToGroup:
+    Type: "AWS::IAM::UserToGroupAddition"
+    Properties:
+      GroupName: !Ref AnalystGroup
+      Users:
+        - !Ref DataAnalyst1
+        - !Ref DataAnalyst2
+
+  # Developer Custom Policy
+  DeveloperPolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Groups:
+        - !Ref DeveloperGroup
+      PolicyName: "AppFilesAccess"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: # allows us to get object
+              - "s3:GetObject"
+            Resource: !Ref S3BucketAppFiles # from s3 bucket storing app files
+
+  # Finance Custom Policy
+  FinancePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      Groups:
+        - !Ref FinanceGroup
+      PolicyName: "CostExplorerAccess"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: # allows us to get object
+              - "ce:GetRightsizingRecommendation"
+              - "ce:GetCostAndUsage"
+              - "ce:GetSavingsPlansUtilization"
+              - "ce:GetReservationPurchaseRecommendation"
+              - "ce:ListCostCategoryDefinitions"
+              - "ce:GetCostForecast"
+              - "ce:ListSavingsPlansPurchaseRecommendationGeneration"
+              - "ce:GetPreferences"
+              - "ce:GetReservationUtilization"
+              - "ce:GetCostCategories"
+              - "ce:GetSavingsPlansPurchaseRecommendation"
+              - "ce:GetDimensionValues"
+              - "ce:GetSavingsPlansUtilizationDetails"
+              - "ce:GetCostAndUsageWithResources"
+              - "ce:ListCostAllocationTags"
+              - "ce:DescribeReport"
+              - "ce:GetReservationCoverage"
+              - "ce:GetSavingsPlansCoverage"
+              - "ce:DescribeNotificationSubscription"
+              - "ce:GetTags"
+              - "ce:GetUsageForecast"
+            Resource: "*"
+
+    MFAPolicy:
+      Type: "AWS::IAM::Policy"
+      Properties:
+        PolicyName: !Sub "${EnvironmentName}-MFAPolicy"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: AllowViewAccountInfo
+              Effect: Allow
+              Action: iam:ListVirtualMFADevices
+              Resource: "*"
+            - Sid: AllowManageOwnVirtualMFADevice
+              Effect: Allow
+              Action:
+                - iam:CreateVirtualMFADevice
+              Resource: arn:aws:iam::*:mfa/${aws:username}
+            - Sid: AllowManageOwnUserMFA
+              Effect: Allow
+              Action:
+                - iam:EnableMFADevice
+                - iam:GetUser
+                - iam:ListMFADevices
+                - iam:ResyncMFADevice
+              Resource: arn:aws:iam::*:user/${aws:username}
+            - Sid: DenyAllExceptListedIfNoMFA
+              Effect: Deny
+              NotAction:
+                - iam:CreateVirtualMFADevice
+                - iam:EnableMFADevice
+                - iam:GetUser
+                - iam:ListMFADevices
+                - iam:ListVirtualMFADevices
+                - iam:ResyncMFADevice
+                - sts:GetSessionToken
+              Resource: "*"
+              Condition:
+                BoolIfExists:
+                  aws:MultiFactorAuthPresent: "false"
+        Groups:
+          Fn::Split:
+            - ","
+            - !Ref DeveloperGroup
+            - !Ref OperationGroup
+            - !Ref FinanceGroup
+            - !Ref AnalystGroup
