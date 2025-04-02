@@ -11,11 +11,11 @@ Here is the list of mini-projects and their description:
 - **Static website:** Deployed a Next.js static website in an AWS S3 bucket. The S3 bucket and CloudFront distribution were deployed using Terraform.
 
 ## Cloud Portfolio Projects
-- **Project 1:** With AWS CloudFormation, created IAM users for each employee of an imaginary company, attached users to their corresponding IAM group (Developer, Operation, Finance or Data Analyst) and configured required permissions for each group.
-- **Project 2:**
-- **Project 3:**
-- **Project 4:**
-- **Project 5:**
-- **Project 6:**
-- **Project 7:**
-- **Project 8:**
+- **Project 1 - Identity and Access Management:** With AWS CloudFormation, created IAM users for each employee of an imaginary company, attached users to their corresponding IAM group (Developer, Operation, Finance or Data Analyst) and configured required permissions for each group.
+- **Project 2 - AWS Migration:**
+- **Project 3 - NextJS Portfolio Site on AWS Amplify:**
+- **Project 4 - TravelEase Contact Form:**
+- **Project 5 - CloudPipe DevOps:**
+- **Project 6 - Serverless Task Management:**
+- **Project 7 - Disaster Recovery:**
+- **Project 8 - Swift Support, IAM Configurations:**
