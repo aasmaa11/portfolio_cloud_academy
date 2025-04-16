@@ -9,12 +9,14 @@ const app = new cdk.App();
 const vpcStack = new Project2Stack(app, 'Project2Stack', {
 });
 
-new EC2Stack(app, 'MyEC2Stack', {
+const ec2Stack = new EC2Stack(app, 'MyEC2Stack', {
   vpc: vpcStack.vpc
 })
 
 new RDSStack(app, 'MyRDSStack', {
-  vpc: vpcStack.vpc
+  vpc: vpcStack.vpc,
+  ec2Instance1: ec2Stack.instance1,
+  ec2Instance2: ec2Stack.instance2,
 })
 
 app.synth()

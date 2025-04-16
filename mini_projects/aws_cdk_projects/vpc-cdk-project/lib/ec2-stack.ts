@@ -11,7 +11,7 @@ export class EC2Stack extends cdk.Stack {
     constructor(scope: Construct, id: string, props: EC2StackProps) {
         super(scope, id, props);
     
-        // EC2 instance
+        // EC2 instance 1 in AZ 1
         const instance1 = new ec2.Instance(this, 'MyPrivateEC2-AZ1', {
             vpc: props.vpc, // specifies in which vpc ec2 is launched
             vpcSubnets: { // which type of subnet to use
