@@ -46,5 +46,11 @@ You should now be connected to the RDS database
 <img width="446" alt="image" src="https://github.com/user-attachments/assets/6c44c856-cfc9-4548-94d7-4187f4e84326" />
 
 ### Screenshot of security group configurations
+#### EC2 Security Group Inbound Rule
+![{12272678-DDB3-4D01-A95B-0555B094EF0C}](https://github.com/user-attachments/assets/68fc2029-ecfb-4f96-9a37-cf5df4b8bfaf)
+#### RDS Security Group Inbound Rule
+![{4A90BCD6-5212-4B24-9402-0865A6785020}](https://github.com/user-attachments/assets/24f16c61-a449-480d-ac82-ea60228b0415)
 
 ### Evidence of successful cdk deploy and cdk destroy
+![{85CEE369-7915-49DF-A87F-6E1CE4BF2D96}](https://github.com/user-attachments/assets/abe952b1-6c3a-4e52-97ec-e24331de5813)
+
