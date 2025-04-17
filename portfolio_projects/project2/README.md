@@ -14,6 +14,7 @@ I was tasked to build an AWS infrastructure via Infrastructure as Code for an im
 - The security group of EC2 instances allow SSH access from my IP address.
 - The security group of RDS instances allow EC2 instances to access them through port 3306 (mySQL connection).
 - SecretsManager is configured to generate a password for the username postgres. These credentials must be provided by the EC2 instance to connect to the RDS database.
+- The EC2 instances were given the secretsManagerAccessRole to have access to the database credentials stored in the Secrets Manager.
 
 ## How to test the architecture on your local machine
 1. Provide your IP address at line 27 of lib/ec2-stack.ts
